@@ -198,7 +198,9 @@ public class DevLoader extends WebappLoader {
 	protected List loadWebClassPathFile(File prjDir) {
 
 		String projectdir = prjDir.getAbsolutePath().replace('\\', '/');
+
 		log("projectdir=" + projectdir);
+		// projectdir=E:/文档/2014/配电网协同作业/svn/01.服务器应用/trunk/pdimis/knet-pdimis-webapp/src/main/webapp
 
 		File cpFile = new File(prjDir, this.webClassPathFile);
 		if (cpFile.exists()) {
@@ -212,15 +214,22 @@ public class DevLoader extends WebappLoader {
 				while ((line = lr.readLine()) != null) {
 					line = line.replace('\\', '/');
 
-					//对于webapp模块应当忽略target/classes和target/test-classes的加载
 					if (!line.startsWith("/")) {
-						if (line.indexOf("target/classes") > -1 || line.indexOf("target/test-classes") > -1) {
+						// 加载\xxxx-webapp\src\main\webapp下除了classes和lib之外的文件
+						if (line.indexOf("target/classes") > -1) {
+							line = projectdir;
+						} else if (line.indexOf("target/test-classes") > -1) {
 							continue;
 						}
 					}
 
 					rc.add(line);
 				}
+
+				//加载maven webapp resources下的资源文件
+				String resources = projectdir.substring(0, projectdir.lastIndexOf("/")) + "/resources/";
+				
+				rc.add(resources);
 
 				return rc;
 			} catch (IOException ioEx) {
