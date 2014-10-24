@@ -212,6 +212,7 @@ public class DevLoader extends WebappLoader {
 				while ((line = lr.readLine()) != null) {
 					line = line.replace('\\', '/');
 
+					//对于webapp模块应当忽略target/classes和target/test-classes的加载
 					if (!line.startsWith("/")) {
 						if (line.indexOf("target/classes") > -1 || line.indexOf("target/test-classes") > -1) {
 							continue;
