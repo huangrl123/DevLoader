@@ -129,18 +129,46 @@ public class DevLoader extends WebappLoader {
 	private String buildDependencyClassPath(String webappWorkLoaderDir, String entry) {
 		String path = "/target/classes";
 
+		// webappWorkLoaderDir=E:/dahuang_workspace/iots/
+		// entry=/dahuangit-base
+
+		// 向下级目录进行查找
 		String dir = findDir(webappWorkLoaderDir, entry);
 
-		if (null == dir) {
-			logError("目录[" + dir + "]不存在，请检查配置!");
-			return null;
+		if (null != dir) {
+			return dir + path;
 		}
 
-		return dir + path;
+		// 如果下级目录找不到，则向除了本目录的上级目录之外的平级目录进行查找
+		File baseDirFile = new File(webappWorkLoaderDir);
+		File pf = baseDirFile.getParentFile();
+		// E:\dahuang_workspace
+
+		File[] childFiles = pf.listFiles();
+
+		for (File child : childFiles) {
+			String fileName = child.getName();
+			// dahuangit-util
+
+			// 如果是本目录的上级目录，则跳过
+			if (baseDirFile.getName().equals(fileName)) {
+				continue;
+			}
+
+			// 如果是目录中含有完整名字，则表明找到了,不用再继续找了
+			if (entry.indexOf(fileName) > 0) {
+				return child.getAbsolutePath() + path;
+			}
+		}
+
+		logError("目录[" + entry + "]不存在，请检查配置!");
+
+		return null;
 	}
 
 	private static String findDir(String baseDir, String targetDir) {
 		File baseDirFile = new File(baseDir);
+
 		File[] childFiles = baseDirFile.listFiles();
 
 		for (File childFile : childFiles) {
@@ -226,9 +254,9 @@ public class DevLoader extends WebappLoader {
 					rc.add(line);
 				}
 
-				//加载maven webapp resources下的资源文件
+				// 加载maven webapp resources下的资源文件
 				String resources = projectdir.substring(0, projectdir.lastIndexOf("/")) + "/resources/";
-				
+
 				rc.add(resources);
 
 				return rc;
